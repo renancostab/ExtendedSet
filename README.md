@@ -8,6 +8,7 @@ ExtendedSet is a extension of the set usually found in the Lazarus, the main goa
 
 
 ## Features: ##
+
 * Compatible with Lazarus/Free Pascal
 * Support for x86 and x64
 * Operations supported:
