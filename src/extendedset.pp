@@ -91,6 +91,9 @@ begin
   if Length(ASet) = 0 then
     Exit;
 
+  if (AValue < ASet[0]) or (AValue > ASet[High(ASet)]) then
+    Exit;
+
   Index := ESBinarySearch(ASet, AValue);
   if Index = -1 then
     Exit;
@@ -152,7 +155,7 @@ procedure ESSort(var ASet: TES);
   end;
 begin
   if Length(ASet) = 0 then
-      Exit;
+    Exit;
 
   Quick(ASet, 0, High(ASet));
 end;
@@ -187,12 +190,21 @@ begin
 end;
 
 operator := (const S1: TESByte): TES;
+const
+  MAX = 250;
 var
-  I: Integer;
+  Count: Integer = 0;
+  Value: Integer;
 begin
-  SetLength(Result, 0);
-  for I in S1 do
-    ESInclude(Result, I);
+  SetLength(Result, MAX);
+  for Value in S1 do
+  begin
+    Result[Count] := Value;
+    Inc(Count);
+  end;
+
+  if Count <> MAX then
+    SetLength(Result, Count);
 end;
 
 operator := (const S1: TES): TESByte;
@@ -206,17 +218,21 @@ end;
 
 operator = (const S1: TES; const S2: TESByte): Boolean;
 var
-  I, C: Integer;
+  Index: Integer = 0;
+  Value: Integer;
 begin
-  C := 0;
-  for I in S2 do
+  if ((Length(S1) = 0) and (S2 <> [])) or ((Length(S1) > 0) and (S2 = [])) then
+    Exit(False);
+
+  for Value in S2 do
   begin
-    if ESBinarySearch(S1, I) = -1 then
+    if (Index > High(S1)) or (S1[Index] <> Value) then
       Exit(False);
 
-    C += 1;
+    Inc(Index);
   end;
-  Result := C = Length(S1);
+
+  Result := True;
 end;
 
 operator + (const S1, S2: TES): TES;
@@ -241,7 +257,6 @@ var
 begin
   SetLength(Result, Length(S2));
   Move(S2[0], Result[0], Length(S2) * SizeOf(Integer));
-  ESSort(Result);
 
   for I in S1 do
     ESInclude(Result, I);
@@ -289,14 +304,45 @@ operator * (const S1, S2: TES): TES;
 var
   I: Integer;
   J: Integer = 0;
+  Subset: TES;
+  Mainset: TES;
 begin
-  SetLength(Result, Length(S1));
-  for I := 0 to High(S1) do
+  if S1 = S2 then
+    Exit(S1);
+
+  if (Length(S1) = 0) or (Length(S2) = 0) then
+    Exit([]);
+
+  if (S1[0] > S2[High(S2)]) or (S2[0] > S1[High(S2)]) then
+    Exit([]);
+
+  if Length(S1) < Length(S2) then
   begin
-    if ESBinarySearch(S2, S1[I]) = -1 then
+    SetLength(Result, Length(S1));
+    Subset := S1;
+    Mainset := S2;
+  end
+  else
+  begin
+    SetLength(Result, Length(S2));
+    Subset := S2;
+    Mainset := S1;
+  end;
+
+  if S1[0] > S2[0] then
+  begin
+
+  end
+  else
+  begin
+  end;
+
+  for I := 0 to High(Subset) do
+  begin
+    if ESBinarySearch(Mainset, Subset[I]) = -1 then
       Continue;
 
-    Result[J] := S1[I];
+    Result[J] := Subset[I];
     J += 1;
   end;
 
@@ -305,11 +351,17 @@ begin
 end;
 
 operator * (const S1: TES; const S2: TESByte): TES;
+const
+  MAX = 250;
 var
   I: Integer;
   J: Integer = 0;
 begin
-  SetLength(Result, Length(S1));
+  if Length(S1) < MAX then
+    SetLength(Result, Length(S1))
+  else
+    SetLength(Result, MAX);
+
   for I in S2 do
   begin
     if ESBinarySearch(S1, I) = -1 then
