@@ -22,6 +22,8 @@ type
 { TMyApplication }
 
 procedure TMyApplication.DoRun;
+const
+  VALUE = 1000000;
 var
   I: Integer;
   A: TES;
@@ -75,10 +77,10 @@ begin
   A := [];
   B := [];
 
-  SetLength(A, 1000000);
-  SetLength(B, 1000000);
+  SetLength(A, VALUE);
+  SetLength(B, VALUE);
 
-  for I := 0 to 1000000 do
+  for I := 0 to High(A) do
   begin
     A[I] := Random(Integer.MaxValue);
     B[I] := Random(Integer.MaxValue);
