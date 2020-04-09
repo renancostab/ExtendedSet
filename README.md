@@ -30,11 +30,14 @@ interface
 
 uses
   ExtendSet;
-    
+
+const
+  VALUE = 1000000;
+
 var
- A: TES;
- B: TES;
- C: TES;
+  A: TES;
+  B: TES;
+  C: TES;
  
 begin
   A := [1, 2, 3, 4]
@@ -45,5 +48,37 @@ begin
     WriteLn("No intersection between A and B")
   else
     WriteLn("A has a intersection with B");
-    
+        
+  A := [];
+  B := [];
+
+  SetLength(A, VALUE);
+  SetLength(B, VALUE);
+
+  for I := 0 to High(A) do
+  begin
+    A[I] := Random(Integer.MaxValue);
+    B[I] := Random(Integer.MaxValue);
+  end;
+
+  ESSort(A);
+  ESSort(B);
+  ESRemoveDuplicate(A);
+  ESRemoveDuplicate(B);      
+  
+  C := A * B;
+  if C = [] then
+    WriteLn('No intersection')
+  else
+    WriteLn('Intersection of: ', Length(C), ' members');
+
+  if ESEqual(A, B) then
+    WriteLn('A = B')
+  else
+    WriteLn('A <> B');
+
+  if A <= B then
+    WriteLn('A contains B')
+  else
+    WriteLn('A not contains B');    
 end.
