@@ -280,7 +280,7 @@ begin
   if Length(Result) = 0 then
     Exit;
 
-  for I := 0 to High(S1) do
+  for I := Low(S1) to High(S1) do
   begin
     if Inters <= S1[I] then
       Continue;
@@ -356,7 +356,7 @@ begin
     SubRight := ESBinarySortSearch(Subset, Mainset[High(Mainset)], Found);
   end;
 
-  SetLength(Result, Right - Left);
+  SetLength(Result, (Right - Left) + 1);
   for I := Low(Subset) to SubRight do
   begin
     Index := ESBinaryRangeSearch(Mainset, Left, Right, Subset[I]);
