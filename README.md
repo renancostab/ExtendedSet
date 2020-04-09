@@ -17,9 +17,13 @@ ExtendedSet is a extension of the set usually found in the Lazarus, the main goa
   - Sub
   - Equal
 
+## Roadmap: ##
+
+ * Add parallel algorithms
+
 ## Performance: ##
 
-The extended set can calculate the intersection of two sets of elements with 1 M each in less than 300 ms in an ordinary cpu. Check the demo project for better examples.
+The extended set can calculate the intersection of two sets of elements with 1 M each in less than 300 ms in an ordinary cpu, check the demo project for better examples.
 
 ## Quick Example ##
 
