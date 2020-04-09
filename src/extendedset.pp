@@ -54,7 +54,8 @@ type
 
   operator <= (const S1, S2: TES): Boolean;
   operator <= (const S1: TES; S2: TESByte): Boolean;
-  operator <= (const S1: TES; S2: Integer): Boolean;
+  operator <= (const S1: TES; Value: Integer): Boolean;
+
 
 implementation
 
@@ -91,7 +92,7 @@ begin
   if Length(ASet) = 0 then
     Exit;
 
-  if (AValue < ASet[0]) or (AValue > ASet[High(ASet)]) then
+  if (AValue < ASet[Low(ASet)]) or (AValue > ASet[High(ASet)]) then
     Exit;
 
   Index := ESBinarySearch(ASet, AValue);
@@ -157,7 +158,7 @@ begin
   if Length(ASet) = 0 then
     Exit;
 
-  Quick(ASet, 0, High(ASet));
+  Quick(ASet, Low(ASet), High(ASet));
 end;
 
 procedure ESRemoveDuplicate(var ASet: TES);
@@ -165,7 +166,7 @@ var
   I: Integer;
   J: Integer = 0;
 begin
-  for I := 0 to High(ASet) do
+  for I := Low(ASet) to High(ASet) do
   begin
     if ASet[I] <> ASet[I + 1] then
     begin
@@ -186,15 +187,15 @@ begin
   if Length(S1) <> Length(S2) then
     Exit(False);
 
-  Result := CompareMem(@S1[0], @S2[0], Length(S1) * SizeOf(Integer));
+  Result := CompareMem(@S1[Low(S1)], @S2[Low(S1)], Length(S1) * SizeOf(Integer));
 end;
 
 operator := (const S1: TESByte): TES;
 const
-  MAX = 250;
+  MAX = Byte.MaxValue + 1;
 var
-  Count: Integer = 0;
   Value: Integer;
+  Count: Integer = 0;
 begin
   SetLength(Result, MAX);
   for Value in S1 do
@@ -212,14 +213,14 @@ var
   I: Integer;
 begin
   Result := [];
-  for I := 0 to High(S1) do
-    Include(Result, I);
+  for I := Low(S1) to High(S1) do
+    Include(Result, S1[I]);
 end;
 
 operator = (const S1: TES; const S2: TESByte): Boolean;
 var
-  Index: Integer = 0;
   Value: Integer;
+  Index: Integer = 0;
 begin
   if ((Length(S1) = 0) and (S2 <> [])) or ((Length(S1) > 0) and (S2 = [])) then
     Exit(False);
@@ -300,59 +301,80 @@ begin
     ESExclude(Result, I);
 end;
 
+function CheckForIntersection(const S1, S2: TES): Boolean; inline;
+begin
+  Result := False;
+
+  if (Length(S1) = 0) or (Length(S2) = 0) then
+    Exit;
+
+  if (S1[Low(S1)] > S2[High(S2)]) or (S2[Low(S2)] > S1[High(S1)]) then
+    Exit;
+
+  Result := True;
+end;
+
 operator * (const S1, S2: TES): TES;
 var
-  I: Integer;
-  J: Integer = 0;
-  Subset: TES;
   Mainset: TES;
+  Subset: TES;
+  Found: Boolean;
+  I: Integer;
+  Index: Integer;
+  Left: Integer;
+  Right: Integer;
+  SubRight: Integer;
+  Count: Integer = 0;
 begin
   if S1 = S2 then
     Exit(S1);
 
-  if (Length(S1) = 0) or (Length(S2) = 0) then
+  if not CheckForIntersection(S1, S2) then
     Exit([]);
 
-  if (S1[0] > S2[High(S2)]) or (S2[0] > S1[High(S2)]) then
-    Exit([]);
-
-  if Length(S1) < Length(S2) then
+  if S1[Low(S1)] > S2[Low(S2)] then
   begin
-    SetLength(Result, Length(S1));
     Subset := S1;
     Mainset := S2;
   end
   else
   begin
-    SetLength(Result, Length(S2));
     Subset := S2;
     Mainset := S1;
   end;
 
-  if S1[0] > S2[0] then
-  begin
+  Left := ESBinarySortSearch(Mainset, Subset[Low(Subset)], Found, False);
 
+  if (Subset[High(Subset)] < Mainset[High(Mainset)]) then
+  begin
+    Right := ESBinarySortSearch(Mainset, Subset[High(Subset)], Found);
+    SubRight := High(Subset);
   end
   else
   begin
+    Right := High(Mainset);
+    SubRight := ESBinarySortSearch(Subset, Mainset[High(Mainset)], Found);
   end;
 
-  for I := 0 to High(Subset) do
+  SetLength(Result, Right - Left);
+  for I := Low(Subset) to SubRight do
   begin
-    if ESBinarySearch(Mainset, Subset[I]) = -1 then
+    Index := ESBinaryRangeSearch(Mainset, Left, Right, Subset[I]);
+    if Index = -1 then
       Continue;
 
-    Result[J] := Subset[I];
-    J += 1;
+    Result[Count] := Mainset[Index];
+    Inc(Count);
+    Left := Index;
   end;
 
-  if J <> Length(Result) then
-    SetLength(Result, J);
+  if Count <> Length(Result) then
+    SetLength(Result, Count);
 end;
 
 operator * (const S1: TES; const S2: TESByte): TES;
 const
-  MAX = 250;
+  MAX = Byte.MaxValue + 1;
 var
   I: Integer;
   J: Integer = 0;
@@ -385,9 +407,9 @@ begin
   Result := (S1 * S2) = S2;
 end;
 
-operator <= (const S1: TES; S2: Integer): Boolean;
+operator <= (const S1: TES; Value: Integer): Boolean;
 begin
-  Result := ESBinarySearch(S1, S2) > -1;
+  Result := ESBinarySearch(S1, Value) > -1;
 end;
 
 end.

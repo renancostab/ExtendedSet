@@ -28,12 +28,13 @@ type
   TES = array of Integer;
   TESByte = set of Byte;
 
-  function ESBinarySortSearch(const ASet: TES; AValue: Integer; out AFound: Boolean): Integer;
+  function ESBinarySortSearch(const ASet: TES; AValue: Integer; out AFound: Boolean; ALeft: Boolean = True): Integer;
   function ESBinarySearch(const ASet: TES; AValue: Integer): Integer;
+  function ESBinaryRangeSearch(const ASet: TES; ALeft, ARight, AValue: Integer): Integer;
 
 implementation
 
-function ESBinarySortSearch(const ASet: TES; AValue: Integer; out AFound: Boolean): Integer;
+function ESBinarySortSearch(const ASet: TES; AValue: Integer; out AFound: Boolean; ALeft: Boolean = True): Integer;
 var
   Left, Right, Mid: Integer;
 begin
@@ -56,15 +57,23 @@ begin
       Left := Mid + 1;
   end;
 
-  Result := Left;
+  if ALeft then
+    Result := Left
+  else
+    Result := Right;
 end;
 
 function ESBinarySearch(const ASet: TES; AValue: Integer): Integer;
+begin
+  Result := ESBinaryRangeSearch(ASet, Low(ASet), High(ASet), AValue);
+end;
+
+function ESBinaryRangeSearch(const ASet: TES; ALeft, ARight, AValue: Integer): Integer;
 var
   Left, Right, Mid: Integer;
 begin
-  Left := 0;
-  Right := High(ASet);
+  Left := ALeft;
+  Right := ARight;
 
   while Left <= Right do
   begin
