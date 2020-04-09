@@ -58,7 +58,8 @@ begin
 
   SetLength(A, VALUE);
   SetLength(B, VALUE);
-
+  
+  Randomize;
   for I := 0 to High(A) do
   begin
     A[I] := Random(Integer.MaxValue);
